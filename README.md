@@ -17,7 +17,7 @@ Este projeto consiste em uma implementação de uma rede neural LSTM (Long Short
 ## Instalação
 
 1. Clone este repositório:
-git clone https://github.com/seu-usuario/nome-do-repositorio.git
+git clone https://github.com/bastosgabriel312/deep-learning-trading.git
 
 
 2. Instale as dependências:
