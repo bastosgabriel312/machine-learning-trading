@@ -4,7 +4,7 @@ Este projeto consiste em uma implementação de uma rede neural LSTM (Long Short
 
 ## Pré-requisitos
 
-- Python 3.x
+- Python 3.9.8
 - TensorFlow
 - Keras
 - scikit-learn
