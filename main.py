@@ -24,13 +24,13 @@ X_train, y_train = X[:int(0.8*len(df))], y[:int(0.8*len(df))]
 X_test, y_test = X[int(0.8*len(df)):], y[int(0.8*len(df)):]
 
 # Train or load the LSTM model
-train_model = False
+train_model = True
 
 if train_model:
-    model = train_lstm_model(X_train, y_train,'lstm_5000_32_1362023.csv')
-    model.save('models\lstm_5000_32_13062023.h5')
+    model = train_lstm_model(X_train, y_train,'lstm_5000_32_17082023.csv')
+    model.save('models\lstm_5000_32_17082023.h5')
 else:
-    model_path ='models\lstm_5000_32_13062023.h5'
+    model_path ='models\lstm_5000_32_17082023.h5'
     # Carregar o arquivo .h5 com o h5py
     with h5py.File(model_path, 'r') as f:
         # Obter o modelo do arquivo
