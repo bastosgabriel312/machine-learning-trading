@@ -1,8 +1,8 @@
 from utils import * 
 
 ###### CONFIGURAÇÕES DA BINANCE
-api_key_binance = sua_chave
-api_secret_binance = sua_chave
+api_key_binance = os.getenv('API_KEY')
+api_secret_binance = os.getenv('API_SECRET')
 client = Client(api_key_binance, api_secret_binance)
 
 symbol = 'BTCUSDT'                                 ## MOEDA
@@ -13,7 +13,7 @@ limit = 10000                                       ## LIMITE
 df = get_concatenate_klines_mvrv(client,symbol,interval,limit)
 
 ###### PREPROCESSA OS DADOS
-dataset = preprocess_manual(df)
+dataset,scalers = preprocess_manual(df)
 
 COLUNAS_DATASET_COM_ALV0 = dataset.columns
 COLUNAS_DATASET_SEM_ALVO = dataset.copy().drop('target-high', axis=1).columns
@@ -44,5 +44,6 @@ print(f'mean_squared_error: {mse_lr}')
 print(f'r2 score: {r2_lr}')
 
 # Salvar um modelo treinado
-with open(f'/content/drive/MyDrive/1_experimento/modelo/rl_{symbol}.pkl', 'wb') as arquivo:
-    pickle.dump(lr, arquivo)
+with open(f'models/rl_{symbol}.pkl', 'wb') as arquivo:
+    pickle.dump({'modelo': lr, 'scalers': scalers}, arquivo)
+

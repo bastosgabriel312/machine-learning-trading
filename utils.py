@@ -1,12 +1,16 @@
 import numpy as np
 import pandas as pd
 from binance.client import Client
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import cross_val_score
 import csv
 from datetime import datetime
-import time
 import pickle
+import os
 
 # Função para calcular o ERRO MÉDIO ABSOLUTO
 def mae(y_true, predictions):
@@ -133,29 +137,50 @@ def normalize_data(df, column_name):
   scaler.fit(df[[column_name]])
 
   # Aplique a transformação aos dados
-  return scaler.transform(df[[column_name]])
+  return scaler,scaler.transform(df[[column_name]])
 
 # Função principal para pré processamento dos dados, utiliza as técnicas de quartile e normalização dos dados históricos
 def preprocess_manual(historical_data):
-  # adiciona a coluna que no dataset será o alvo
-  historical_data = calcular_target_high(historical_data.copy())
-  # Cria uma lista vazia para representar o df preprocessado
-  df_preprocessed = historical_data.copy()
+    # Adiciona a coluna que no dataset será o alvo
+    historical_data = calcular_target_high(historical_data.copy())
+    
+    # Lista das colunas a serem normalizadas
+    list_columns_normalize = ['open', 'high', 'low',
+       'close', 'volume',
+       'quote_asset_volume', 'number_of_trades',
+       'taker_buy_base_asset_volume',
+       'taker_buy_quote_asset_volume', 'mvrv_ratio'
+    ]
 
-  # Separa os parametros que serão normalizados e divididos em quartis
-  list_columns_quartil = ['volume','quote_asset_volume', 'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume','open']
-  list_columns_normalize = ['open','high','low','close','mvrv_ratio']
+    # Crie um dicionário para armazenar os scalers
+    scalers = {}
+    
+    # Loop para normalizar cada coluna e armazenar o scaler correspondente
+    for col in list_columns_normalize:
+        scaler = MinMaxScaler()
+        scaler.fit(historical_data[[col]])  # Ajusta o scaler apenas a uma coluna
+        scalers[col] = scaler  # Armazena o scaler no dicionário
 
-  list_columns_normalize = ['volume','quote_asset_volume', 'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume','open','high','low','close','mvrv_ratio']
+        # Aplica a transformação à coluna no DataFrame
+        historical_data[[col]] = scaler.transform(historical_data[[col]])
 
-  for column in list_columns_normalize:
-    df_preprocessed[f'normalized_{column}'] = normalize_data(historical_data, column)
+        # Salve o scaler em um arquivo separado usando pickle
+        with open(f'scaler_{col}.pkl', 'wb') as arquivo:
+            pickle.dump(scaler, arquivo)
 
-  # Retira as colunas divididas em quartis
-  list_drop = ['ignore','timestamp','timestamp_to_date', 'close_time'] +list_columns_normalize +list_columns_quartil
-  df_preprocessed = df_preprocessed.drop(list_drop,axis=1)
+    # Cria um DataFrame temporário com as colunas normalizadas e nomes modificados
+    colunas_normalizadas = pd.DataFrame(
+        {f'normalized_{col}': historical_data[col] for col in list_columns_normalize}
+    )
 
-  return df_preprocessed
+    # Adiciona a coluna alvo ao DataFrame temporário
+    colunas_normalizadas['target-high'] = historical_data['target-high']
+
+    # Substitui as colunas originais em 'historical_data' pelas colunas normalizadas com nomes modificados
+    historical_data = colunas_normalizadas
+
+    # Retorna o DataFrame preprocessado e o dicionário de scalers
+    return historical_data, scalers
 
 def calcular_target_high(historical_data, num_periodos=4):
     max_highs = []
@@ -169,4 +194,6 @@ def calcular_target_high(historical_data, num_periodos=4):
     historical_data_alvo = historical_data.copy()
     historical_data_alvo['target-high'] = historical_data_alvo['target-high'].astype('float64')
     return historical_data_alvo
+
+
 
