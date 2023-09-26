@@ -3,7 +3,6 @@ import pandas as pd
 from binance.client import Client
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import precision_score, recall_score, f1_score
-from keras.optimizers import RMSprop, Adam, SGD
 import csv
 from datetime import datetime
 import time
