@@ -164,10 +164,6 @@ def preprocess_manual(historical_data):
         # Aplica a transformação à coluna no DataFrame
         historical_data[[col]] = scaler.transform(historical_data[[col]])
 
-        # Salve o scaler em um arquivo separado usando pickle
-        with open(f'scaler_{col}.pkl', 'wb') as arquivo:
-            pickle.dump(scaler, arquivo)
-
     # Cria um DataFrame temporário com as colunas normalizadas e nomes modificados
     colunas_normalizadas = pd.DataFrame(
         {f'normalized_{col}': historical_data[col] for col in list_columns_normalize}
