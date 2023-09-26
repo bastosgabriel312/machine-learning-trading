@@ -1,6 +1,6 @@
-# deep-learning-trading
+# machine-learning-trading
 
-Este projeto consiste em uma implementação de uma rede neural LSTM (Long Short-Term Memory) para previsão de preços no mercado financeiro de criptomoedas. O modelo é treinado utilizando dados históricos de preços e realiza a previsão de preços futuros com base nesses dados.
+Este projeto consiste na avaliação e implementação de modelos de machine learning para previsão de preços no mercado financeiro de criptomoedas. O modelo é treinado utilizando dados históricos de preços provenientes da binance e realiza a previsão de valores futuros com base nesses dados.
 
 ## Pré-requisitos
 
@@ -17,34 +17,35 @@ Este projeto consiste em uma implementação de uma rede neural LSTM (Long Short
 ## Instalação
 
 1. Clone este repositório:
-git clone https://github.com/bastosgabriel312/deep-learning-trading.git
+git clone https://github.com/bastosgabriel312/machine-learning-trading.git
 
 
 2. Instale as dependências:
-pip install tensorflow keras scikit-learn pandas numpy matplotlib python-binance h5py
+pip install tensorflow keras scikit-learn pandas numpy matplotlib python-binance h5py pytz
 
 
 ## Utilização
 
-1. Preencha sua chave de API e segredo no arquivo `main.py`:
+1. Preencha sua chave de API e segredo no arquivo `model.py`:
 api_key = 'sua-chave-de-api'
 api_secret = 'seu-segredo'
 
 
-2. Execute o arquivo `main.py` para treinar o modelo e realizar as previsões:
-python main.py
+2. Execute o arquivo `model.py` para treinar e salvar o modelo:
+python model.py
 
 
-3. Os resultados serão exibidos no console e um gráfico com as previsões será gerado.
+3. Para carregar o modelo e realizar predições execute o `main.py`.
 
 ## Estrutura do projeto
 
-- `main.py`: Arquivo principal que contém o código para treinamento e previsão utilizando a rede LSTM.
-- `utils.py`: Módulo com funções utilitárias para pré-processamento dos dados, criação do modelo LSTM e avaliação das previsões.
-- `models/`: Pasta que armazena os modelos treinados em formato HDF5.
+- `main.py`: Arquivo principal que contém o código para carregar o modelo e prever os valores.
+- `model.py`: Arquivo que contém o código para treinar e salvar o modelo.
+- `utils.py`: Módulo com funções utilitárias para pré-processamento dos dados.
+- `models/`: Pasta que armazena os modelos treinados.
 - `data/`: Pasta opcional para armazenar os dados históricos.
 - `results/`: Pasta opcional para armazenar os resultados das previsões.
 
 ## Resultados
 
-- Os resultados das previsões são exibidos no console e um gráfico com as previsões é gerado.
+- .
