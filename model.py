@@ -7,7 +7,7 @@ client = Client(api_key_binance, api_secret_binance)
 
 symbol = 'BTCUSDT'                                 ## MOEDA
 interval = Client.KLINE_INTERVAL_15MINUTE          ## INTERVALO
-limit = 10000                                       ## LIMITE
+limit = 17280                                       ## LIMITE
 
 ###### RETORNA OS DADOS HISTÓRICOS COM MÉTRICA DE MVRV
 df = get_concatenate_klines_mvrv(client,symbol,interval,limit)
@@ -36,6 +36,7 @@ lr.fit(X_train, y_train)
 # Fazendo previsões com os dados de teste
 y_pred = lr.predict(X_test)
 
+print(X_test.columns)
 # Avaliando o desempenho do modelo
 mse_lr = mean_squared_error(y_test, y_pred)
 r2_lr = r2_score(y_test, y_pred)
