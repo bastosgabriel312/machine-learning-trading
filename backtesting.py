@@ -12,11 +12,11 @@ warnings.filterwarnings("ignore", category=UserWarning, module="sklearn")
 api_key_binance = os.getenv('API_KEY')
 api_secret_binance = os.getenv('API_SECRET')
 client = Client(api_key_binance, api_secret_binance)
-symbol = 'BTCUSDT'  # MOEDA
+symbol = 'BNBUSDT'  # MOEDA
 interval = Client.KLINE_INTERVAL_15MINUTE  # INTERVALO
 
 # Carregar o modelo salvo
-with open(f'models/rl_{symbol}.pkl', 'rb') as arquivo:
+with open(f'models/rl_{symbol}_1m.pkl', 'rb') as arquivo:
     dados_carregados = pickle.load(arquivo)
 
 # Recupere o modelo e o scaler
@@ -27,7 +27,7 @@ scalers = dados_carregados['scalers']
 dados_historicos = pd.read_csv(f'backtesting/{symbol}_28_09.csv')
 
 # Parâmetros da estratégia
-saldo_inicial = 100  # Saldo inicial da conta
+saldo_inicial = 1000  # Saldo inicial da conta
 saldo = saldo_inicial
 ativo = None  # Para rastrear o ativo em carteira
 preco_compra = 0  # Preço de compra do ativo
