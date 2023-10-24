@@ -9,8 +9,8 @@ client = Client(api_key_binance, api_secret_binance)
 
 symbol = 'ETCUSDT'                                 ## MOEDA
 interval = Client.KLINE_INTERVAL_15MINUTE          ## INTERVALO
-limit = 96 # 4 X 24  = 24H                          ## LIMITE
+limit = 1920 # 4 X 24  = 24H                          ## LIMITE
 
 ###### RETORNA OS DADOS HISTÓRICOS COM MÉTRICA DE MVRV
 df = get_concatenate_klines_mvrv(client,symbol,interval,limit)
-df.to_csv(f'backtesting/{symbol}_28_09.csv')
+df.to_csv(f'backtesting/{symbol}_01_10_20D.csv')
