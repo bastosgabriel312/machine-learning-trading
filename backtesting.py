@@ -9,9 +9,9 @@ from binance.client import Client
 warnings.filterwarnings("ignore", category=UserWarning, module="sklearn")
 
 # PRECO DE COMPRA * 0.3 -- todo: utilizar boas praticas de stop_loss
-STOP_LOSS = {'BTCUSDT':0.5,'ETCUSDT':0.5,'BNBUSDT':0.5}
+STOP_LOSS = {'BTCUSDT':0.05,'ETCUSDT':0.05,'BNBUSDT':0.05}
 # PRECO DE COMPRA * 1.3 -- todo: utilizar boas praticas de stop_gain
-STOP_GAIN = {'BTCUSDT':1.20,'ETCUSDT':1.20,'BNBUSDT':1.20}
+STOP_GAIN = {'BTCUSDT':1.10,'ETCUSDT':1.10,'BNBUSDT':1.10}
 
 
 
@@ -19,7 +19,7 @@ STOP_GAIN = {'BTCUSDT':1.20,'ETCUSDT':1.20,'BNBUSDT':1.20}
 api_key_binance = os.getenv('API_KEY')
 api_secret_binance = os.getenv('API_SECRET')
 client = Client(api_key_binance, api_secret_binance)
-symbol = 'BNBUSDT'  # MOEDA
+symbol = 'BTCUSDT'  # MOEDA
 TEMPO_DO_MODELO = '6m'
 DIAS_DE_BT = '20D'
 interval = Client.KLINE_INTERVAL_15MINUTE  # INTERVALO
@@ -48,8 +48,12 @@ resultados = []
 
 # Realizar backtesting
 for indice, row in dados_historicos.iterrows():
-    if count_periodos == 5:
+    #representação do maior high entre 4 periodos
+    high_real = row.high
+    high_real = row.high if row.high > high_real else high_real
+    if count_periodos == 4:
         count_periodos = 0
+        high_real = 0
     if count_periodos < 1:
         entrada_modelo = row.drop(['Unnamed: 0', 'timestamp', 'timestamp_to_date', 'close_time', 'ignore'])
         # Normalizar cada coluna individualmente usando os scalers correspondentes
@@ -64,83 +68,37 @@ for indice, row in dados_historicos.iterrows():
         # Transforma o dicionário em um DataFrame 2D
         entrada_modelo_preprocessada_df = pd.DataFrame([entrada_modelo_preprocessada])
         previsao = modelo.predict(entrada_modelo_preprocessada_df.values)
-
-    # Verificar se o target-high foi atingido e realizar a compra ou venda
-    if ativo is None:
-        # Compra no início do período
-        ativo = saldo / row.close
-        preco_compra = row.close
-        saldo = 0
-        resultados.append({
-            'Tipo de Operação': f'Compra ({count_periodos})',
-            'Preço de Compra': row.close,
-            'Saldo': saldo,
-            'Ativo em Carteira': ativo
-        })
         
-    elif row.close >= previsao and preco_compra < row.close:
-            # Vende quando atinge o high e o preço é maior do que o preço de compra
-            saldo = ativo * row.close
-            ativo = None
-            lucro = saldo - saldo_inicial
+        
+        # Verificar se o target-high foi atingido e realizar a compra ou venda
+        if ativo is None:
+            print(f">>>>>>>>> COMPRA")
+            print(f"previsão: {previsao}")
+            # Compra no início do período
+            ativo = saldo / row.close
+            preco_compra = row.close
+            saldo = 0
             resultados.append({
-                'Tipo de Operação': f'Venda ({count_periodos})',
-                'Lucro': lucro,
-                'Valor Previsto': float(previsao),
-                'Valor Real': row.close,
-                'Diferença': float(previsao - row.close),
-                'Saldo': saldo
+                'Tipo de Operação': f'Compra ({count_periodos})',
+                'Preço de Compra': row.close,
+                'Saldo': saldo,
+                'Ativo em Carteira': ativo,
+                'high real': row.high
             })
-    elif (row.close >= (STOP_GAIN[symbol] * preco_compra)):
-            # Vende quando atinge o stop gain
-            saldo = ativo * row.close
-            ativo = None
-            lucro = saldo - saldo_inicial
-            resultados.append({
-                'Tipo de Operação': f'Venda por STOP GAIN ({count_periodos})',
-                'Lucro': lucro,
-                'Valor Previsto': float(previsao),
-                'Valor Real': row.close,
-                'Diferença': float(previsao - row.close),
-                'Saldo': saldo
-            })
-    # vende se atingir o stop_loss
-    elif (row.close <= (STOP_LOSS[symbol] * preco_compra)):
-        # Vende por prejuizo
-            saldo = ativo * row.close
-            ativo = None
-            lucro = saldo - saldo_inicial
-            resultados.append({
-                'Tipo de Operação': f'Venda por STOP GAIN ({count_periodos})',
-                'Lucro': lucro,
-                'Valor Previsto': float(previsao),
-                'Valor Real': row.close,
-                'Diferença': float(previsao - row.close),
-                'Saldo': saldo
-            })
-    elif ativo is not None:
+    elif ativo is not None and count_periodos == 3:
+        saldo = ativo * row.close
+        ativo = None
+        lucro = saldo - saldo_inicial
         resultados.append({
-            'Tipo de Operação': f'(no final do período {count_periodos})',
-            'Lucro': 'x',
+            'Tipo de Operação': f'(Periodo atual: {count_periodos})',
+            'high real': row.high,
+            'Lucro': lucro,
             'Valor Previsto': float(previsao),
             'Valor Real': row.close,
             'Diferença': float(previsao - row.close),
             'Saldo': saldo
         })
     count_periodos += 1
-if ativo is not None:
-    # venda final
-    saldo = ativo * row.close
-    ativo = None
-    lucro = saldo - saldo_inicial
-    resultados.append({
-                'Tipo de Operação': f'(venda final {count_periodos})',
-                'Lucro': lucro,
-                'Valor Previsto': float(previsao),
-                'Valor Real': row.close,
-                'Diferença': float(previsao - row.close),
-                'Saldo': saldo
-            })
 # Exportar o DataFrame para um arquivo CSV
 df_resultados = pd.DataFrame(resultados)
 df_resultados.to_csv(f'results/resultados_backtest_{symbol}_{TEMPO_DO_MODELO}_{DIAS_DE_BT}.csv', index=False)
